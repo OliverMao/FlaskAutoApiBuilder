@@ -132,6 +132,7 @@
 ## 技术反馈与交流群
 
   <img src="./demo/static/official.jpg" alt style="width: 20%;">
+
 - 加入交流群交流
 - 获取Faab开发教程文章
 - 与作者进行相关交流
