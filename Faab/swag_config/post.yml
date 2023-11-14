@@ -1,0 +1,21 @@
+tags:
+  - 新增数据 - POST API
+consumes:
+  - "application/json"
+parameters:
+  - name: fieldsThatExistInModel
+    in: body
+    type: object
+    required: true
+    description: 输入任意数量Model中存在的字段值，必填项
+responses:
+  500:
+    description: 服务出错!
+  200:
+    description: 查询结果
+    schema:
+      properties:
+        info:
+          type: object
+          description: 查询的单个结果
+          default: Lua
