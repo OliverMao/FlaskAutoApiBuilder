@@ -3,7 +3,7 @@
 from Faab import faab
 from Faab.FaabJWT import jwt_authentication
 from blueprints.test import test_bp
-from blueprints.test.model import Users, TabNavMenu
+from blueprints.test.model import Users
 import factory as fac
 
 
@@ -24,12 +24,7 @@ models = [
         {
             "model": Users,
             "bp": test_bp,
-            "url_name": "Users"
-        },
-        {
-            "model": TabNavMenu,
-            "bp": test_bp,
-            "url_name": "TabNavMenu"
+            "url_prefix": "Users"
         }
     ]
 ]

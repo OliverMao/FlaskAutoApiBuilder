@@ -1,6 +1,6 @@
 
 
-<div align="center"><a href="https://github.com/OliverMao/FlaskAutoApiBuilder" ><img width="300" src="https://z1.ax1x.com/2023/11/14/piYkvUU.png" alt="piYkvUU.png" border="0" /></a>
+<div align="center"><a href="https://github.com/OliverMao/FlaskAutoApiBuilder" ><img width="300" src="./demo/static/logo_s.png" alt="piYkvUU.png" border="0" /></a>
 <h1> 📦 Faab - Flask Auto API Builder</h1><div><a href="https://github.com/OliverMao/FlaskAutoApiBuilder" ><img  src="https://img.shields.io/badge/license-GPL3.0-blue.svg" alt="license" border="0" /></a>
   <img  src="https://img.shields.io/github/stars/OliverMao/FlaskAutoApiBuilder.svg" alt="stars" border="0" />
   <img  src="https://img.shields.io/github/forks/OliverMao/FlaskAutoApiBuilder.svg" alt="forks" border="0" />
@@ -43,32 +43,72 @@
 
 ## 快速开始
 
+0. 创建app.py
 1. 安装Faab：
-   ```
-   pip install Faab
-   ```
-
+    ```
+    pip install Faab
+    ```
 2. 项目中引入
+    ```python
+    from Faab import faab
+    from Faab.FaabJWT import jwt_authentication
+    from blueprints.test import test_bp
+    from blueprints.test.model import Users, TabNavMenu
+    import factory as fac
+    ```
+3. 配置数据库连接
+    ```python
+    class DBConfig(object):
+        # 基础配置
+        user_root = 'faab'
+        host = 'localhost'
+        password_root = 'faab'
+        SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://%s:%s@%s:3306/%s' % (user_root, password_root, host, 'faab')
+        SQLALCHEMY_BINDS = {
+            'test': 'mysql+pymysql://%s:%s@%s:3306/%s' % (user_root, password_root, host, 'test')
+        }
+        SECRET_KEY = 'your_session_key'
+    ```
+4. 配置API Model与蓝图
+    ```python
+    models = [
+        [
+            {
+                "model": your_model,
+                "bp": your_blueprints,
+                "url_prefix": "your_url_prefix"
+            }
+        ]
+    ]
+    
+    app = faab(__name__)
+    app.add_models(models)
+    app.add_db_config(DBConfig)
+    fac.register(app)
+    ```
+5. 配置启动参数
+    ```python
+    if __name__ == '__main__':
+        app.run(debug=True, port=5000, host='0.0.0.0')
+    ```
+6. 运行
+    ```shell
+    python app.py
+    ```
+7. 在浏览器中访问Swagger文档：
    ```
-   from Faab import faab
+   http://localhost:5000/apidocs
    ```
 
-3. 在浏览器中访问项目：
-   ```
-   http://localhost:5000
-   ```
 
-## 配置
+## Faab开发文档
 
-说明如何配置项目，包括数据库连接、API 密钥等。
+详细的文档将在正式版更新。
 
-## API 文档
+## 开源不易, 有了您的赞助, 我们会做的更好~
 
-如果您的项目提供了 API 接口，可以在这里提供相关的 API 文档和示例。
+  <img src="./demo/static/donate.jpg" alt style="width: 20%;">
 
-## 贡献指南
-
-详细的文档可以在 [Faab文档](https://your-documentation-link.com) 找到。
 
 ## 许可证
 
@@ -84,11 +124,12 @@
 
 有关完整的许可证文本，请参阅项目根目录中的 LICENSE 文件。
 
-## 联系方式
+## 技术反馈与交流群
 
-
-
-## 常见问题
+  <img src="./demo/static/official.jpg" alt style="width: 20%;">
+- 加入交流群交流
+- 获取Faab开发教程文章
+- 与作者进行相关交流
 
 
 

@@ -18,7 +18,7 @@ db = SQLAlchemy()
 class AutoUrl:
     def __init__(self, add_url_list):
         for i in add_url_list:
-            AutoDB(i["model"], i["bp"], i["url_name"])
+            AutoDB(i["model"], i["bp"], i["url_prefix"])
 
 
 class AutoDB:
