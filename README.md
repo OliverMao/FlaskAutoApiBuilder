@@ -1,11 +1,15 @@
 
-# 📦 Faab (form Yoobit.cn)
 
-[![GitHub license](https://img.shields.io/badge/license-GPL3.0-blue.svg)](https://github.com/your/awesome-project/blob/master/LICENSE) [![GitHub stars](https://img.shields.io/github/stars/OliverMao/FlaskAutoApiBuilder.svg)]([OliverMao/FlaskAutoApiBuilder (github.com)](https://github.com/OliverMao/FlaskAutoApiBuilder)) [![GitHub forks](https://img.shields.io/github/forks/OliverMao/FlaskAutoApiBuilder.svg)]([OliverMao/FlaskAutoApiBuilder (github.com)](https://github.com/OliverMao/FlaskAutoApiBuilder)) 
+<div align="center"><a href="https://github.com/OliverMao/FlaskAutoApiBuilder" ><img width="300" src="https://z1.ax1x.com/2023/11/14/piYkvUU.png" alt="piYkvUU.png" border="0" /></a>
+<h1> 📦 Faab - Flask Auto API Builder</h1><div><a href="https://github.com/OliverMao/FlaskAutoApiBuilder" ><img  src="https://img.shields.io/badge/license-GPL3.0-blue.svg" alt="license" border="0" /></a>
+  <img  src="https://img.shields.io/github/stars/OliverMao/FlaskAutoApiBuilder.svg" alt="stars" border="0" />
+  <img  src="https://img.shields.io/github/forks/OliverMao/FlaskAutoApiBuilder.svg" alt="forks" border="0" />
+  <img  src="https://img.shields.io/badge/version-0.1.4-686480r.svg" alt="forks" border="0" />
+</div></div>
+
+
 
 ## 项目简介
-
-<img src="https://z1.ax1x.com/2023/11/14/piYktj1.jpg" alt="Logo" width="300">
 
 "Flask Auto API Builder" 是一个基于 Flask 框架的自动 API 构建工具。
 
