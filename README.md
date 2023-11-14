@@ -44,19 +44,24 @@
 ## 快速开始
 
 0. 创建app.py
-1. 安装Faab：
+1. 创建factory.py、blueprints及蓝图（根据开发项目自定）
+	
+	> 可直接使用Faab提供的demo进行开发
+	
+2. 安装Faab：
     ```
     pip install Faab
     ```
-2. 项目中引入
+3. 项目中引入
     ```python
     from Faab import faab
+    
     from Faab.FaabJWT import jwt_authentication
     from blueprints.test import test_bp
     from blueprints.test.model import Users, TabNavMenu
-    import factory as fac
+    import factory as fac 
     ```
-3. 配置数据库连接
+4. 配置数据库连接
     ```python
     class DBConfig(object):
         # 基础配置
@@ -69,7 +74,7 @@
         }
         SECRET_KEY = 'your_session_key'
     ```
-4. 配置API Model与蓝图
+5. 配置AutoAPI Model与蓝图
     ```python
     models = [
         [
@@ -84,18 +89,18 @@
     app = faab(__name__)
     app.add_models(models)
     app.add_db_config(DBConfig)
-    fac.register(app)
+    fac.register(app) #可选
     ```
-5. 配置启动参数
+6. 配置启动参数
     ```python
     if __name__ == '__main__':
         app.run(debug=True, port=5000, host='0.0.0.0')
     ```
-6. 运行
+7. 运行
     ```shell
     python app.py
     ```
-7. 在浏览器中访问Swagger文档：
+8. 在浏览器中访问Swagger文档：
    ```
    http://localhost:5000/apidocs
    ```
