@@ -9,12 +9,12 @@ import factory as fac
 
 class DBConfig(object):
     # 基础配置
-    user_root = 'faab'
+    user = 'faab'
     host = 'localhost'
-    password_root = 'faab'
-    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://%s:%s@%s:3306/%s' % (user_root, password_root, host, 'faab')
+    password = 'faab'
+    SQLALCHEMY_DATABASE_URI = 'mysql+pymysql://%s:%s@%s:3306/%s' % (user, password, host, 'faab')
     SQLALCHEMY_BINDS = {
-        'test': 'mysql+pymysql://%s:%s@%s:3306/%s' % (user_root, password_root, host, 'test')
+        'test': 'mysql+pymysql://%s:%s@%s:3306/%s' % (user, password, host, 'test')
     }
     SECRET_KEY = 'session_key'
 
