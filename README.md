@@ -44,7 +44,7 @@
 ## 快速开始
 
 0. 创建app.py
-1. 创建factory.py、blueprints及蓝图（根据开发项目自定）
+1. 创建factory.py、blueprints（根据开发项目自定）
 	
 	> 可直接使用Faab提供的demo进行开发
 	
