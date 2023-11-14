@@ -5,11 +5,11 @@
 
 ## 项目简介
 
-<img src="https://z1.ax1x.com/2023/11/14/piYPOHO.png" alt="Logo" width="300">
+<img src="https://z1.ax1x.com/2023/11/14/piYktj1.jpg" alt="Logo" width="300">
 
 "Flask Auto API Builder" 是一个基于 Flask 框架的自动 API 构建工具。
 
-本工具可以根据给定的数据模型或数据库模式自动生成 API 端点，包括创建、读取、更新和删除（CRUD）操作。它们可以减少开发人员手动编写和配置 API 端点的工作量，提高开发效率。同时可以生成Swagger文档，便于API调试。
+本工具可以根据给定的数据模型或数据库模式自动生成 API 端点，包括创建、读取、更新和删除（CRUD）操作。它们可以减少开发人员手动编写和配置 API 端点的工作量，提高开发效率。同时可以生成Swagger文档，便于API调试。此外，Faab还提供了常见的Web工具，如用户鉴权、上传下载等功能，进一步增强了开发者的体验。
 
 ## 功能特性
 
@@ -46,7 +46,7 @@
 
 2. 项目中引入
    ```
-   python app.py
+   from Faab import faab
    ```
 
 3. 在浏览器中访问项目：
