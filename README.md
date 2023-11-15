@@ -1,11 +1,12 @@
 
 
-<div align="center"><a href="https://github.com/OliverMao/FlaskAutoApiBuilder" ><img width="300" src="https://github.com/OliverMao/FlaskAutoApiBuilder/blob/main/static/logo_s.png?raw=true" alt="piYkvUU.png" border="0" /></a>
+<div align="center"><a href="https://github.com/OliverMao/FlaskAutoApiBuilder" ><img width="300" src="https://z1.ax1x.com/2023/11/14/piYkvUU.png" alt="piYkvUU.png" border="0" /></a>
 <h1> 📦 Faab - Flask Auto API Builder (DEV)</h1><div><a href="https://github.com/OliverMao/FlaskAutoApiBuilder" ><img  src="https://img.shields.io/badge/license-GPL3.0-blue.svg" alt="license" border="0" /></a>
   <img  src="https://img.shields.io/github/stars/OliverMao/FlaskAutoApiBuilder.svg" alt="stars" border="0" />
   <img  src="https://img.shields.io/github/forks/OliverMao/FlaskAutoApiBuilder.svg" alt="forks" border="0" />
   <img  src="https://img.shields.io/badge/version-0.1.5-686480r.svg" alt="forks" border="0" />
 </div></div>
+
 
 
 
@@ -115,7 +116,7 @@
 
 ## 开源不易, 有了您的赞助, 我们会做的更好~
 
-  <img src="https://github.com/OliverMao/FlaskAutoApiBuilder/blob/main/static/donate.jpg?raw=true" alt style="width: 20%;">
+  <img src="https://z1.ax1x.com/2023/11/15/piYc4Cq.jpg" alt style="width: 20%;">
 
 
 ## 许可证
@@ -134,7 +135,7 @@
 
 ## 技术反馈与交流群
 
-  <img src="https://github.com/OliverMao/FlaskAutoApiBuilder/blob/main/static/official.jpg?raw=true" alt style="width: 20%;">
+  <img src="https://z1.ax1x.com/2023/11/15/piYcI2V.jpg" alt style="width: 20%;">
 
 - 加入交流群交流
 - 获取Faab开发教程文章
