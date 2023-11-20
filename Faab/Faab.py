@@ -6,7 +6,7 @@ from .factory import create_app
 from Faab.__version__ import VERSION as version
 
 
-class faab(Flask):
+class Faab(Flask):
     _startup_message_printed = False
     models = []
     db_config = object()

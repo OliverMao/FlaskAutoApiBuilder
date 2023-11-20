@@ -58,7 +58,7 @@
     ```
 3. 项目中引入
     ```python
-    from Faab import faab
+    from Faab import Faab
     
     from Faab.FaabJWT import jwt_authentication
     from blueprints.test import test_bp
@@ -90,7 +90,7 @@
         ]
     ]
     
-    app = faab(__name__)
+    app = Faab(__name__)
     app.add_models(models)
     app.add_db_config(DBConfig)
     fac.register(app) #可选
