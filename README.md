@@ -1,7 +1,7 @@
 
 
 <div align="center"><a href="https://github.com/OliverMao/FlaskAutoApiBuilder" ><img width="300" src="https://z1.ax1x.com/2023/11/14/piYkvUU.png" alt="piYkvUU.png" border="0" /></a>
-<h1> 📦 Faab - Flask Auto API Builder (DEV)</h1><div><a href="https://github.com/OliverMao/FlaskAutoApiBuilder" ><img  src="https://img.shields.io/badge/license-GPL3.0-blue.svg" alt="license" border="0" /></a>
+<h1> 📦 Faab - Flask Auto API Builder</h1><div><a href="https://github.com/OliverMao/FlaskAutoApiBuilder" ><img  src="https://img.shields.io/badge/license-GPL3.0-blue.svg" alt="license" border="0" /></a>
   <img  src="https://img.shields.io/github/stars/OliverMao/FlaskAutoApiBuilder.svg" alt="stars" border="0" />
   <img  src="https://img.shields.io/github/forks/OliverMao/FlaskAutoApiBuilder.svg" alt="forks" border="0" />
   <img  src="https://img.shields.io/badge/version-0.1.6-686480r.svg" alt="forks" border="0" />
