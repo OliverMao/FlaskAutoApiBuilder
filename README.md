@@ -116,7 +116,7 @@
 
 ## 开源不易, 有了您的赞助, 我们会做的更好~
 
-  <img src="https://z1.ax1x.com/2023/11/15/piYc4Cq.jpg" alt style="width: 20%;">
+  <img src="./static/donate.jpg" alt style="width: 20%;">
 
 
 ## 许可证
@@ -135,7 +135,7 @@
 
 ## 技术反馈与交流群
 
-  <img src="https://z1.ax1x.com/2023/11/15/piYcI2V.jpg" alt style="width: 20%;">
+  <img src="./static/official.jpg" alt style="width: 20%;">
 
 - 加入交流群交流
 - 获取Faab开发教程文章
