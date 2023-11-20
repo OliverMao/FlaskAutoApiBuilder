@@ -24,6 +24,21 @@ import ffmpeg
 
 
 def upload(file, app=None, path=None):
+    """
+        上传文件并保存到指定路径
+
+        Args:
+            file (File): 要上传的文件对象
+            app (Flask App, optional): Flask应用对象，默认为None
+            path (str, optional): 文件保存路径，默认为None
+
+        Returns:
+            str: 文件的保存路径
+
+        Raises:
+            'No file selected': 当没有选择文件时抛出
+            'app' was not delivered: 当没有提供app对象时抛出
+    """
     # 检查文件是否存在
     if file.filename is None:
         return 'No file selected', 400
@@ -39,6 +54,22 @@ def upload(file, app=None, path=None):
 
 
 def faab_compress_image(file, path=None, app=None, quality=100, format_=None):
+    """
+       压缩图像文件。
+
+       参数：
+       file: 上传的文件
+       path: 保存文件的路径，默认为None
+       app: Flask应用对象，默认为None
+       quality: 压缩质量，默认为100
+       format_: 图像格式，默认为None
+
+       返回：
+       字符串：压缩后的文件路径
+       整数：HTTP状态码
+
+       提供了一个压缩图像文件的函数。首先检查是否选择了文件，然后确定保存文件的路径（默认为'app.root_path/static'），然后再检查是否提供了Flask应用对象。接下来，检查文件类型是否是图像文件，并进行相应的压缩处理。如果文件类型不是图像文件或者文件大小超过了限制，将返回相应的错误信息。最后，返回压缩后的文件路径和HTTP状态码。
+   """
     if file.filename is None:
         return "No selected file.", 400
     if path is None:
@@ -63,6 +94,18 @@ def faab_compress_image(file, path=None, app=None, quality=100, format_=None):
 
 
 def faab_compress(path, file, quality=100, crf=0):
+    """
+        使用指定的路径、质量和常量比特率（CRF）压缩给定的文件。
+
+        参数:
+            path (str): 文件所在的路径。
+            file (file): 要压缩的文件。
+            quality (int, 可选): 压缩的品质设置。默认为100。
+            crf (int, 可选): 压缩的常量比特率设置。默认为0。
+
+        返回:
+            dict: 压缩结果的字典。如果压缩成功，包括压缩后的文件路径。
+    """
     # 检查上传的文件是否为图片或视频
     compressed_filename = ''
     if file.filename == '':

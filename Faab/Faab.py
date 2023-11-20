@@ -13,15 +13,19 @@ class faab(Flask):
     need_register_bp = []
 
     def __init__(self, import_name: str):
+        # 初始化函数，接收一个字符串类型的参数import_name
         super().__init__(import_name)
 
     def add_models(self, model: list):
+        # 添加模型函数，接收一个列表类型的参数model
         self.models = model
 
     def add_db_config(self, db_config: object):
+        # 添加数据库配置函数，接收一个对象类型的参数db_config
         self.db_config = db_config
 
     def add_blueprints(self, blueprint: list):
+        # 添加蓝图函数，接收一个列表类型的参数blueprint
         self.need_register_bp = blueprint
 
     def run(
@@ -32,6 +36,15 @@ class faab(Flask):
             load_dotenv: bool = True,
             **options: t.Any,
     ) -> None:
+        """
+           Run the Flask server.
+
+           :param host: The host address the server should bind to.
+           :param port: The port the server should run on.
+           :param debug: Whether to run in debug mode.
+           :param load_dotenv: Whether to load the `.env` file.
+           :param options: Additional options to pass to the server.
+        """
         create_app(app=self, models=self.models, db_config=self.db_config, url_prefix="/api",
                    blueprints=self.need_register_bp)
         CORS(self, resources=r'/*')

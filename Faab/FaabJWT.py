@@ -50,8 +50,9 @@ def verify_jwt(token, secret=None):
 
 
 def login_required(f):
-    '让装饰器装饰的函数属性不会变 -- name属性'
-    '第1种方法,使用functools模块的wraps装饰内部函数'
+    """
+    使用functools模块的wraps装饰内部函数
+    """
 
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
@@ -77,9 +78,6 @@ def login_required(f):
 
 
 def admin_login_required(f):
-    '让装饰器装饰的函数属性不会变 -- name属性'
-    '第1种方法,使用functools模块的wraps装饰内部函数'
-
     @functools.wraps(f)
     def wrapper(*args, **kwargs):
         try:
@@ -90,7 +88,6 @@ def admin_login_required(f):
         except BaseException as e:
             return {'message': '请先登录认证.'}, 401
 
-    '第2种方法,在返回内部函数之前,先修改wrapper的name属性'
     # wrapper.__name__ = f.__name__
     return wrapper
 

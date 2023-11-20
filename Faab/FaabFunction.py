@@ -8,9 +8,7 @@ from sqlalchemy.orm import class_mapper
 from flask_sqlalchemy import SQLAlchemy
 
 from Faab.FaabJWT import login_required
-
-# 扩展类实例化
-db = SQLAlchemy()
+from Faab.extensions import db
 
 
 # ......
