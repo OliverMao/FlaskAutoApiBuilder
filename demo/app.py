@@ -1,6 +1,6 @@
 # Faab Project Demo
 
-from Faab import faab
+from Faab import Faab
 from Faab.FaabJWT import jwt_authentication
 from blueprints.test import test_bp
 from blueprints.test.model import Users
@@ -29,7 +29,7 @@ models = [
     ]
 ]
 
-app = faab(__name__)
+app = Faab(import_name=__name__, static_url_path='/s')
 app.add_models(models)
 app.add_db_config(DBConfig)
 fac.register(app)

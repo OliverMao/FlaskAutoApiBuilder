@@ -12,9 +12,9 @@ class Faab(Flask):
     db_config = object()
     need_register_bp = []
 
-    def __init__(self, import_name: str):
+    def __init__(self, **options):
         # 初始化函数，接收一个字符串类型的参数import_name
-        super().__init__(import_name)
+        super().__init__(**options)
 
     def add_models(self, model: list):
         # 添加模型函数，接收一个列表类型的参数model
