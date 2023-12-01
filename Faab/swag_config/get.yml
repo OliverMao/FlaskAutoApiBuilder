@@ -10,7 +10,7 @@ parameters:
     in: param
     type: string
     required: false
-    description: 排序方式，填写desc或None，非必填项
+    _Desc: 排序方式，填写desc或None，非必填项
 responses:
   500:
     description: 服务出错!

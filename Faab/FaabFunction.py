@@ -2,7 +2,7 @@ import json
 from functools import wraps
 
 from flasgger import swag_from
-from flask import request
+from flask import request, g
 from sqlalchemy import and_
 from sqlalchemy.orm import class_mapper
 from flask_sqlalchemy import SQLAlchemy
@@ -102,13 +102,15 @@ class AutoDB:
             need_update = form.get('need_update')
             condition = form.get('condition')
             for key, value in condition.items():
+                if key == "_Own":
+                    continue
                 exists = self.check_parameter_exists(key)
                 if not exists:
-                    return {'error': '参数错误', 'code': 0}
+                    return {'error': 'a参数错误', 'code': 11}
             for key, value in need_update.items():
                 exists = self.check_parameter_exists(key)
                 if not exists:
-                    return {'error': '参数错误', 'code': 0}
+                    return {'error': 'b参数错误', 'code': 10}
             # noinspection PyCallingNonCallable
             return func(self, *args, **kwargs)
 
@@ -120,30 +122,114 @@ class AutoDB:
 
     @swag_from('swag_config/get.yml')
     def get(self):
-        params = dict(request.args)
-        if 'order_by' not in params:
-            query = self.model.query.filter_by(is_delete=0)
-        else:
-            order_by = params.get('order_by')
-            if order_by == 'desc':
-                query = self.model.query.filter_by(is_delete=0).order_by(self.model.id.desc())
-            else:
+        """
+        根据请求参数获取数据
+
+        从请求参数中获取参数，过滤参数，根据参数进行查询，并返回结果
+
+        Args:
+            self: 对象本身
+
+        Returns:
+            dict: 包含数据的字典
+
+        Remark：
+
+        如果请求参数中包含_Not_Filter，则根据_Not_Filter的值进行过滤操作。
+        如果请求参数中包含_Own，则将数据中的name字段替换为当前用户的用户名。
+        如果请求参数中包含_Pagination，则使用分页方式进行查询。
+        在查询数据之前，根据不同的请求参数，进行一些过滤操作。
+        如果请求参数中包含_Search，则根据_Search的值进行模糊查询。根据其他请求参数进行精确查询。
+        如果过滤操作不为False，则根据对应的键值对进行过滤操作。
+        根据过滤后的条件，使用filter函数过滤查询结果。
+        如果没有进行分页查询，使用all函数获取所有过滤后的数据，并返回。
+        如果进行了分页查询，使用paginate函数进行分页查询。获取分页结果中的数据、分页信息，并将其组织成一个字典，返回给客户端。
+
+        """
+        params = dict(request.args)  # 获取请求参数
+        _Not_Filter = False
+
+        if '_Not_Filter' in params:
+            _Not_Filter = json.loads(params.pop('_Not_Filter'))
+
+        print(params)
+
+        if '_Own' in params:
+            name = params.get('_Own')
+            params[name] = g.username
+            params.pop('_Own')
+
+        if '_Pagination' not in params:
+            if '_Desc' not in params:
                 query = self.model.query.filter_by(is_delete=0)
-            params.pop('order_by')
-        filters = []
+            else:
+                query = self.model.query.filter_by(is_delete=0).order_by(self.model.id.desc())
+                params.pop('_Desc')
 
-        for key, value in params.items():
-            filters.append(getattr(self.model, key) == value)
+            filters = []
 
-        if filters:
-            query = query.filter(and_(*filters))
-        lists = query.all()
+            if '_Search' in params:
+                key = params.pop('_Search')
+                value = params.pop('_Search_value')
+                filters.append(getattr(self.model, key).like('%' + value + '%'))
 
-        return self.list_to_return(lists)
+            for key, value in params.items():
+                filters.append(getattr(self.model, key) == value)
+
+            if _Not_Filter != False:
+                filters.append(getattr(self.model, _Not_Filter['key']) != _Not_Filter['value'])
+
+            if filters:
+                query = query.filter(and_(*filters))
+
+            lists = query.all()  # 执行查询
+
+            return self.list_to_return(lists)
+        else:
+            params.pop('_Pagination')
+            page = int(params.pop('page'))
+            per_page = int(params.pop('per_page'))
+            if '_Desc' not in params:
+                query = self.model.query.filter_by(is_delete=0)
+            else:
+                query = self.model.query.filter_by(is_delete=0).order_by(self.model.id.desc())
+                params.pop('_Desc')
+
+            filters = []
+
+            if '_Search' in params:
+                key = params.pop('_Search')
+                value = params.pop('_Search_value')
+                filters.append(getattr(self.model, key).like('%' + value + '%'))
+
+            for key, value in params.items():
+                filters.append(getattr(self.model, key) == value)
+
+            if _Not_Filter != False:
+                filters.append(getattr(self.model, _Not_Filter['key']) != _Not_Filter['value'])
+
+            if filters:
+                query = query.filter(and_(*filters))
+
+            lists = query.paginate(page=page, per_page=per_page, error_out=False)  # 执行分页查询
+
+            items = lists.items
+            has_next = lists.has_next
+            has_prev = lists.has_prev
+            total = lists.total
+            pages = lists.pages
+
+            return {'items': self.list_to_return(items), 'has_next': has_next, 'has_prev': has_prev, 'total': total,
+                    'pages': pages}
+
 
     @swag_from('swag_config/get_one.yml')
     def get_one(self):
         params = dict(request.args)
+        if '_Own' in params:
+            name = params.get('_Own')
+            params[name] = g.username
+            params.pop('_Own')
         filters = []
         query = self.model.query.filter_by(is_delete=0)
         for key, value in params.items():
@@ -213,6 +299,10 @@ class AutoDB:
         filters = []
         need_update = form.get('need_update')
         condition = form.get('condition')
+        if '_Own' in condition:
+            name = condition.get('_Own')
+            condition[name] = g.username
+            condition.pop('_Own')
         for key, value in condition.items():
             filters.append(getattr(self.model, key) == value)
         if filters:
