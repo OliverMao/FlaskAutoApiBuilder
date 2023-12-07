@@ -2,13 +2,15 @@ import json
 from functools import wraps
 
 from flasgger import swag_from
-from flask import request, g
+from flask import request, g, send_file
 from sqlalchemy import and_
 from sqlalchemy.orm import class_mapper
 from flask_sqlalchemy import SQLAlchemy
 
 from Faab.FaabJWT import login_required
 from Faab.extensions import db
+import pandas as pd
+import io
 
 
 # ......
@@ -43,6 +45,9 @@ class AutoDB:
                              methods=['POST'])
         self.bp.add_url_rule('/' + url_name + '/put', endpoint=bp.name + url_name + 'put',
                              view_func=self.put,
+                             methods=['POST'])
+        self.bp.add_url_rule('/' + url_name + '/export', endpoint=bp.name + url_name + 'export',
+                             view_func=self.export,
                              methods=['POST'])
 
     def list_to_return(self, get_list):
@@ -94,6 +99,29 @@ class AutoDB:
         return wrapper
 
     # noinspection ALL
+    def check_request_export(func):
+        # noinspection PyTypeChecker
+        @wraps(func)
+        def wrapper(self, *args, **kwargs):
+            form = request.json
+            need_export = form.get('need_export')
+            condition = form.get('condition')
+            for key, value in condition.items():
+                if key == "_Own" or key == "_Price":
+                    continue
+                exists = self.check_parameter_exists(key)
+                if not exists:
+                    return {'error': 'a参数错误', 'code': 11}
+            for key, value in need_export.items():
+                exists = self.check_parameter_exists(key)
+                if not exists:
+                    return {'error': 'b参数错误', 'code': 10}
+            # noinspection PyCallingNonCallable
+            return func(self, *args, **kwargs)
+
+        return wrapper
+
+    # noinspection ALL
     def check_request_turn(func):
         # noinspection PyTypeChecker
         @wraps(func)
@@ -122,43 +150,14 @@ class AutoDB:
 
     @swag_from('swag_config/get.yml')
     def get(self):
-        """
-        根据请求参数获取数据
-
-        从请求参数中获取参数，过滤参数，根据参数进行查询，并返回结果
-
-        Args:
-            self: 对象本身
-
-        Returns:
-            dict: 包含数据的字典
-
-        Remark：
-
-        如果请求参数中包含_Not_Filter，则根据_Not_Filter的值进行过滤操作。
-        如果请求参数中包含_Own，则将数据中的name字段替换为当前用户的用户名。
-        如果请求参数中包含_Pagination，则使用分页方式进行查询。
-        在查询数据之前，根据不同的请求参数，进行一些过滤操作。
-        如果请求参数中包含_Search，则根据_Search的值进行模糊查询。根据其他请求参数进行精确查询。
-        如果过滤操作不为False，则根据对应的键值对进行过滤操作。
-        根据过滤后的条件，使用filter函数过滤查询结果。
-        如果没有进行分页查询，使用all函数获取所有过滤后的数据，并返回。
-        如果进行了分页查询，使用paginate函数进行分页查询。获取分页结果中的数据、分页信息，并将其组织成一个字典，返回给客户端。
-
-        """
-        params = dict(request.args)  # 获取请求参数
+        params = dict(request.args)
         _Not_Filter = False
-
         if '_Not_Filter' in params:
             _Not_Filter = json.loads(params.pop('_Not_Filter'))
-
-        print(params)
-
         if '_Own' in params:
             name = params.get('_Own')
             params[name] = g.username
             params.pop('_Own')
-
         if '_Pagination' not in params:
             if '_Desc' not in params:
                 query = self.model.query.filter_by(is_delete=0)
@@ -167,7 +166,6 @@ class AutoDB:
                 params.pop('_Desc')
 
             filters = []
-
             if '_Search' in params:
                 key = params.pop('_Search')
                 value = params.pop('_Search_value')
@@ -182,8 +180,7 @@ class AutoDB:
             if filters:
                 query = query.filter(and_(*filters))
 
-            lists = query.all()  # 执行查询
-
+            lists = query.all()
             return self.list_to_return(lists)
         else:
             params.pop('_Pagination')
@@ -194,9 +191,7 @@ class AutoDB:
             else:
                 query = self.model.query.filter_by(is_delete=0).order_by(self.model.id.desc())
                 params.pop('_Desc')
-
             filters = []
-
             if '_Search' in params:
                 key = params.pop('_Search')
                 value = params.pop('_Search_value')
@@ -210,18 +205,14 @@ class AutoDB:
 
             if filters:
                 query = query.filter(and_(*filters))
-
-            lists = query.paginate(page=page, per_page=per_page, error_out=False)  # 执行分页查询
-
+            lists = query.paginate(page=page, per_page=per_page, error_out=False)
             items = lists.items
             has_next = lists.has_next
             has_prev = lists.has_prev
             total = lists.total
             pages = lists.pages
-
             return {'items': self.list_to_return(items), 'has_next': has_next, 'has_prev': has_prev, 'total': total,
                     'pages': pages}
-
 
     @swag_from('swag_config/get_one.yml')
     def get_one(self):
@@ -318,3 +309,60 @@ class AutoDB:
                 return {'error': e, 'code': -1}
         else:
             return {'error': '未查询到匹配数据', 'code': 0}
+
+    # noinspection PyArgumentList
+    @swag_from('swag_config/export.yml')
+    @check_request_export
+    def export(self):
+        form = request.json
+        query = self.model.query.filter_by(is_delete=0)
+        filters = []
+        need_export = form.get('need_export')
+        condition = form.get('condition')
+        _Price = []
+        if "_Price" in form:
+            # 金额化处理
+            _Price = form.get('_Price').split(',')
+        if '_Own' in condition:
+            name = condition.get('_Own')
+            condition[name] = g.username
+            condition.pop('_Own')
+        for key, value in condition.items():
+            filters.append(getattr(self.model, key) == value)
+        if filters:
+            query = query.filter(and_(*filters))
+        db_list = query.all()
+        if len(db_list) > 0:
+            try:
+                return export_to_excel(db_list, need_export, _Price)
+            except Exception as e:
+                return {'error': e, 'code': -1}
+        else:
+            return {'error': '未查询到匹配数据', 'code': 0}
+
+
+def export_to_excel(db_list, need_export, _Price):
+    # 将查询结果转换为DataFrame
+    out_data = []
+    i = 1
+    for obj in db_list:
+        data = {}
+        data.update({'序号': i})
+        for key, value in need_export.items():
+            if key in _Price:
+                data.update({value: str('{:.2f}'.format(getattr(obj, key)/100))})
+            else:
+                data.update({value: str(getattr(obj, key))})
+        out_data.append(data)
+        i += 1
+    df = pd.DataFrame(out_data)
+
+    # 将数据表导出为XLSX文件
+    output = io.BytesIO()
+    writer = pd.ExcelWriter(output, engine='xlsxwriter')
+    df.to_excel(writer, index=False, sheet_name='Sheet1')
+    writer._save()
+    output.seek(0)
+    # 返回XLSX文件供下载
+    resu = send_file(output, download_name='exported_data.xlsx', as_attachment=True)
+    return resu
