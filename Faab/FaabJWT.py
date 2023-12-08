@@ -25,7 +25,7 @@ def create_token(username, password):
         'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)  # 超时时间
     }
     result = jwt.encode(payload=payload, key=SALT, algorithm="HS256", headers=headers)
-    return result
+    return str(result, encoding='utf-8')
 
 
 def verify_jwt(token, secret=None):
@@ -105,3 +105,4 @@ def jwt_authentication():
             g.username = -2
         except jwt.InvalidTokenError:  # '非法的token'
             g.username = -3
+        # print(g.username)
