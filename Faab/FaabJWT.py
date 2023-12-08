@@ -25,7 +25,7 @@ def create_token(username, password):
         'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)  # 超时时间
     }
     result = jwt.encode(payload=payload, key=SALT, algorithm="HS256", headers=headers)
-    return str(result, encoding='utf-8')
+    return result
 
 
 def verify_jwt(token, secret=None):
@@ -77,19 +77,7 @@ def login_required(f):
     return wrapper
 
 
-def admin_login_required(f):
-    @functools.wraps(f)
-    def wrapper(*args, **kwargs):
-        try:
-            if g.username != 'admin':
-                return {'message': 'token已失效'}, 401
-            else:
-                return f(*args, **kwargs)
-        except BaseException as e:
-            return {'message': '请先登录认证.'}, 401
 
-    # wrapper.__name__ = f.__name__
-    return wrapper
 
 
 def jwt_authentication():
@@ -100,6 +88,7 @@ def jwt_authentication():
     4.判断校验结果,成功就提取token中的载荷信息,赋值给g对象保存
     """
     auth = request.headers.get('Authorization')
+
     if auth and auth.startswith('Bearer '):
         "提取token 0-6 被Bearer和空格占用 取下标7以后的所有字符"
         token = auth[7:]

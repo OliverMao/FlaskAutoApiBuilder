@@ -33,7 +33,8 @@ app = Faab(import_name=__name__, static_url_path='/s')
 app.add_models(models)
 app.add_db_config(DBConfig)
 fac.register(app)
-
+app.faab_ready()
+application = app  # uWSGI启动必须有application
 @app.before_request
 def auth():
     jwt_authentication()

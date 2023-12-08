@@ -28,6 +28,12 @@ class Faab(Flask):
         # 添加蓝图函数，接收一个列表类型的参数blueprint
         self.need_register_bp = blueprint
 
+    def faab_ready(self):
+        create_app(app=self, models=self.models, db_config=self.db_config, url_prefix="/api",
+                   blueprints=self.need_register_bp)
+        CORS(self, resources=r'/*')
+        self._print_startup_message()
+
     def run(
             self,
             host: str | None = None,
@@ -36,19 +42,6 @@ class Faab(Flask):
             load_dotenv: bool = True,
             **options: t.Any,
     ) -> None:
-        """
-           Run the Flask server.
-
-           :param host: The host address the server should bind to.
-           :param port: The port the server should run on.
-           :param debug: Whether to run in debug mode.
-           :param load_dotenv: Whether to load the `.env` file.
-           :param options: Additional options to pass to the server.
-        """
-        create_app(app=self, models=self.models, db_config=self.db_config, url_prefix="/api",
-                   blueprints=self.need_register_bp)
-        CORS(self, resources=r'/*')
-        self._print_startup_message()
         super().run(host, port, debug, load_dotenv, **options)
 
     def _print_startup_message(self):
