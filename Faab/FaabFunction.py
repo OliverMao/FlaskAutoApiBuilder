@@ -75,13 +75,16 @@ class AutoDB:
             Return：Http返回值
         """
         data = {}
-        for col in class_mapper(self.model).mapped_table.c:
-            value = str(getattr(info, col.name))
-            if value != 'None':
-                data[col.name] = value
-            else:
-                continue
-        return data
+        if info:
+            for col in class_mapper(self.model).mapped_table.c:
+                value = str(getattr(info, col.name))
+                if value != 'None':
+                    data[col.name] = value
+                else:
+                    continue
+            return data
+        else:
+            return {}
 
     # noinspection ALL
     def check_request_delete(func):

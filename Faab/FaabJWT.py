@@ -25,7 +25,7 @@ def create_token(username, password):
         'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)  # 超时时间
     }
     result = jwt.encode(payload=payload, key=SALT, algorithm="HS256", headers=headers)
-    return str(result, encoding='utf-8')
+    return result
 
 
 def verify_jwt(token, secret=None):
