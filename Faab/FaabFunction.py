@@ -50,7 +50,7 @@ class AutoDB:
                              view_func=self.export,
                              methods=['POST'])
 
-    def list_to_return(self, get_list):
+    def list_to_return(self, get_list, need_keys=None):
         """
             FuncName:列表转返回值
             Parameter：查询出的结果
@@ -59,12 +59,20 @@ class AutoDB:
         result = []
         for item in get_list:
             data = {}
-            for col in class_mapper(self.model).mapped_table.c:
-                value = str(getattr(item, col.name))
-                if value != 'None':
-                    data[col.name] = value
-                else:
-                    continue
+            if need_keys:
+                for col in need_keys:
+                    value = str(getattr(item, col))
+                    if value != 'None':
+                        data[col] = value
+                    else:
+                        continue
+            else:
+                for col in class_mapper(self.model).mapped_table.c:
+                    value = str(getattr(item, col.name))
+                    if value != 'None':
+                        data[col.name] = value
+                    else:
+                        continue
             result.append(data)
         return result
 
@@ -75,16 +83,13 @@ class AutoDB:
             Return：Http返回值
         """
         data = {}
-        if info:
-            for col in class_mapper(self.model).mapped_table.c:
-                value = str(getattr(info, col.name))
-                if value != 'None':
-                    data[col.name] = value
-                else:
-                    continue
-            return data
-        else:
-            return {}
+        for col in class_mapper(self.model).mapped_table.c:
+            value = str(getattr(info, col.name))
+            if value != 'None':
+                data[col.name] = value
+            else:
+                continue
+        return data
 
     # noinspection ALL
     def check_request_delete(func):
@@ -155,66 +160,68 @@ class AutoDB:
     def get(self):
         params = dict(request.args)
         _Not_Filter = False
+        pagination = False
+        page = 0
+        per_page = 0
+        if '_Pagination' in params:
+            pagination = True
+            params.pop('_Pagination')
+            page = int(params.pop('page'))
+            per_page = int(params.pop('per_page'))
         if '_Not_Filter' in params:
             _Not_Filter = json.loads(params.pop('_Not_Filter'))
         if '_Own' in params:
             name = params.get('_Own')
             params[name] = g.username
             params.pop('_Own')
-        if '_Pagination' not in params:
-            if '_Desc' not in params:
+
+        if '_Desc' not in params:
+            if '_Order' not in params:
                 query = self.model.query.filter_by(is_delete=0)
             else:
-                query = self.model.query.filter_by(is_delete=0).order_by(self.model.id.desc())
-                params.pop('_Desc')
-
-            filters = []
-            if '_Search' in params:
-                key = params.pop('_Search')
-                value = params.pop('_Search_value')
-                filters.append(getattr(self.model, key).like('%' + value + '%'))
-
-            for key, value in params.items():
-                filters.append(getattr(self.model, key) == value)
-
-            if _Not_Filter != False:
-                filters.append(getattr(self.model, _Not_Filter['key']) != _Not_Filter['value'])
-
-            if filters:
-                query = query.filter(and_(*filters))
-
-            lists = query.all()
-            return self.list_to_return(lists)
+                order_key = params.pop('_Order')
+                column = getattr(self.model, order_key)
+                query = self.model.query.filter_by(is_delete=0).order_by(column)
         else:
-            params.pop('_Pagination')
-            page = int(params.pop('page'))
-            per_page = int(params.pop('per_page'))
-            if '_Desc' not in params:
-                query = self.model.query.filter_by(is_delete=0)
-            else:
-                query = self.model.query.filter_by(is_delete=0).order_by(self.model.id.desc())
-                params.pop('_Desc')
-            filters = []
-            if '_Search' in params:
-                key = params.pop('_Search')
-                value = params.pop('_Search_value')
-                filters.append(getattr(self.model, key).like('%' + value + '%'))
+            desc_key = params.pop('_Desc')
+            column = getattr(self.model, desc_key)
+            query = self.model.query.filter_by(is_delete=0).order_by(column.desc())
+        filters = []
+        if "_Range" in params:
+            info = json.loads(params.pop('_Range'))
+            key = info['key']
+            if 'min' in info:
+                filters.append(getattr(self.model, key) >= int(info['min']))
+            if 'max' in info:
+                filters.append(getattr(self.model, key) <= int(info['max']))
+        if '_Search' in params:
+            key = params.pop('_Search')
+            value = params.pop('_Search_value')
+            filters.append(getattr(self.model, key).like('%' + value + '%'))
 
-            for key, value in params.items():
-                filters.append(getattr(self.model, key) == value)
+        need_keys = ''
+        if '_Need_keys' in params:
+            need_keys = params.pop('_Need_keys').split(',')
 
-            if _Not_Filter != False:
-                filters.append(getattr(self.model, _Not_Filter['key']) != _Not_Filter['value'])
+        for key, value in params.items():
+            filters.append(getattr(self.model, key) == value)
 
-            if filters:
-                query = query.filter(and_(*filters))
+        if _Not_Filter != False:
+            filters.append(getattr(self.model, _Not_Filter['key']) != _Not_Filter['value'])
+
+        if filters:
+            query = query.filter(and_(*filters))
+        if not pagination:
+            lists = query.all()
+            return self.list_to_return(lists,need_keys)
+        else:
             lists = query.paginate(page=page, per_page=per_page, error_out=False)
             items = lists.items
             has_next = lists.has_next
             has_prev = lists.has_prev
             total = lists.total
             pages = lists.pages
-            return {'items': self.list_to_return(items), 'has_next': has_next, 'has_prev': has_prev, 'total': total,
+            return {'items': self.list_to_return(items,need_keys), 'has_next': has_next, 'has_prev': has_prev, 'total': total,
                     'pages': pages}
 
     @swag_from('swag_config/get_one.yml')
@@ -334,6 +341,7 @@ class AutoDB:
             filters.append(getattr(self.model, key) == value)
         if filters:
             query = query.filter(and_(*filters))
+        query.filter(self.model.is_pay!=0)
         db_list = query.all()
         if len(db_list) > 0:
             try:
@@ -353,7 +361,7 @@ def export_to_excel(db_list, need_export, _Price):
         data.update({'序号': i})
         for key, value in need_export.items():
             if key in _Price:
-                data.update({value: str('{:.2f}'.format(getattr(obj, key)/100))})
+                data.update({value: str('{:.2f}'.format(getattr(obj, key) / 100))})
             else:
                 data.update({value: str(getattr(obj, key))})
         out_data.append(data)

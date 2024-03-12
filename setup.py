@@ -18,15 +18,15 @@ DESCRIPTION = ('This tool has the capability to automatically generate API endpo
                'CRUD). By doing so, it alleviates the burden on developers to manually write and configure these API '
                'endpoints, thus enhancing development efficiency. Furthermore, it can generate Swagger documentation, '
                'facilitating API debugging.')
-URL = 'https://github.com/OliverMao/FlaskAutoApiBuilder'
+# URL = 'https://github.com/OliverMao/FlaskAutoApiBuilder'
 EMAIL = 'deewpoter@163.com'
-AUTHOR = 'Yoobit Mao'
+AUTHOR = 'Mao'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.1.8'
+VERSION = '0.1.9'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'flask', 'flask-sqlalchemy', 'pymysql', 'Flask-JWT', 'Flask-Cors', 'Pillow', 'ffmpeg-python', 'werkzeug'
+    'flask', 'flask-sqlalchemy', 'pymysql', 'PyJWT', 'Flask-Cors', 'Pillow', 'ffmpeg-python', 'werkzeug'
 ]
 
 # What packages are optional?
@@ -106,7 +106,7 @@ setup(
     author=AUTHOR,
     author_email=EMAIL,
     python_requires=REQUIRES_PYTHON,
-    url=URL,
+    # url=URL,
     packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
     # If your package is a single module, use this instead of 'packages':
     # py_modules=['mypackage'],
