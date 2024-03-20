@@ -199,6 +199,10 @@ class AutoDB:
             value = params.pop('_Search_value')
             filters.append(getattr(self.model, key).like('%' + value + '%'))
 
+        get_resu_num = ''
+        if '_Get_resu_num' in params:
+            get_resu_num = params.pop('_Get_resu_num')
+
         need_keys = ''
         if '_Need_keys' in params:
             need_keys = params.pop('_Need_keys').split(',')
@@ -212,8 +216,11 @@ class AutoDB:
         if filters:
             query = query.filter(and_(*filters))
         if not pagination:
-            lists = query.all()
-            return self.list_to_return(lists,need_keys)
+            if get_resu_num:
+                lists = query.limit(get_resu_num)
+            else:
+                lists = query.all()
+            return self.list_to_return(lists, need_keys)
         else:
             lists = query.paginate(page=page, per_page=per_page, error_out=False)
             items = lists.items
@@ -221,7 +228,7 @@ class AutoDB:
             has_prev = lists.has_prev
             total = lists.total
             pages = lists.pages
-            return {'items': self.list_to_return(items,need_keys), 'has_next': has_next, 'has_prev': has_prev, 'total': total,
+            return {'items': self.list_to_return(items, need_keys), 'has_next': has_next, 'has_prev': has_prev, 'total': total,
                     'pages': pages}
 
     @swag_from('swag_config/get_one.yml')
@@ -341,7 +348,6 @@ class AutoDB:
             filters.append(getattr(self.model, key) == value)
         if filters:
             query = query.filter(and_(*filters))
-        query.filter(self.model.is_pay!=0)
         db_list = query.all()
         if len(db_list) > 0:
             try:
