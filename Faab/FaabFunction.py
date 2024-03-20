@@ -211,7 +211,9 @@ class AutoDB:
             filters.append(getattr(self.model, key) == value)
 
         if _Not_Filter != False:
-            filters.append(getattr(self.model, _Not_Filter['key']) != _Not_Filter['value'])
+            for dictionary in _Not_Filter:
+                for key, value in dictionary.items():
+                    filters.append(getattr(self.model, key) != value)
 
         if filters:
             query = query.filter(and_(*filters))
