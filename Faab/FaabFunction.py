@@ -243,6 +243,7 @@ class AutoDB:
                     'pages': pages}
 
     @swag_from('swag_config/get_one.yml')
+    @login_required
     def get_one(self):
         params = dict(request.args)
         if '_Own' in params:
@@ -261,6 +262,7 @@ class AutoDB:
         return self.one_to_return(item)
 
     @swag_from('swag_config/post.yml')
+    @login_required
     def post(self):
         sets = request.json
         new_item = self.model()
@@ -276,6 +278,7 @@ class AutoDB:
 
     # noinspection PyArgumentList
     @swag_from('swag_config/delete.yml')
+    @login_required
     @check_request_delete
     def delete(self, one_or_list=1, true_del_or_false_del=0):
         params = request.json
@@ -311,6 +314,7 @@ class AutoDB:
 
     # noinspection PyArgumentList
     @swag_from('swag_config/put.yml')
+    @login_required
     @check_request_turn
     def put(self):
         form = request.json
@@ -340,6 +344,7 @@ class AutoDB:
 
     # noinspection PyArgumentList
     @swag_from('swag_config/export.yml')
+    @login_required
     @check_request_export
     def export(self):
         form = request.json

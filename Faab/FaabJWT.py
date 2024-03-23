@@ -59,6 +59,7 @@ def login_required(f):
         if self.authorization == None:
             return f(self, *args, **kwargs)
         else:
+            # TODO 访问控制
             # 获取到了访问控制限制
             try:
                 if g.username == -1:
