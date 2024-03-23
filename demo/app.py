@@ -24,7 +24,8 @@ models = [
         {
             "model": Users,
             "bp": test_bp,
-            "url_prefix": "Users"
+            "url_prefix": "user",
+            "authorization": "user"  # TODO 待完善 添加用户权限类
         }
     ]
 ]
@@ -35,6 +36,8 @@ app.add_db_config(DBConfig)
 fac.register(app)
 app.faab_ready()
 application = app  # uWSGI启动必须有application
+
+
 @app.before_request
 def auth():
     jwt_authentication()

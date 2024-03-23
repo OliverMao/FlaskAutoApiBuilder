@@ -1,3 +1,6 @@
+from flask import g
+from sqlalchemy.orm import column_property, synonym
+
 from Faab.extensions import db
 
 
@@ -11,6 +14,7 @@ class Users(db.Model):
     password = db.Column(db.String(255))
     avatar = db.Column(db.Text(1000), default='')
     is_delete = db.Column(db.Integer, default=0)
+
 
     def __repr__(self):
         return '<users %r>' % self.username

@@ -3,8 +3,37 @@ from flasgger import swag_from
 from flask.views import MethodView
 from flask import request
 
-from blueprints.test import test_bp
+from ..test import test_bp, model
+from Faab.FaabJWT import create_token
+from Faab.extensions import db
 
+
+# 注册
+@test_bp.route('/register', methods=['POST'])
+def register():
+    username = request.json.get('username')
+    password = request.json.get('password')
+    name = request.json.get('name')
+    user_info = model.Users.query.filter_by(username=username).first()
+    if user_info:
+        return "该用户已存在"
+    else:
+        user = model.Users(username=username, password=password, name=name)
+        db.session.add(user)
+        db.session.commit()
+        return "注册成功"
+
+
+@test_bp.route('/login',methods=['POST'])
+def login():
+    user_name = request.json.get('username')
+    password = request.json.get('password')
+    user_info = model.Users.query.filter_by(username=user_name, password=password).first()
+    if user_info:
+        token = 'Bearer '+create_token('admin', "user")
+        return token
+    else:
+        return "错误"
 
 
 class MyAPI(MethodView):

@@ -1,9 +1,9 @@
-from Faab.Faab import faab
+from Faab.Faab import Faab
 from Faab import utils
 from werkzeug.datastructures.file_storage import FileStorage
 
 
-def compress_image(file: FileStorage, app: faab, path: str = None, quality: int = 100, format_: str = None) -> str:
+def compress_image(file: FileStorage, app: Faab, path: str = None, quality: int = 100, format_: str = None) -> str:
     """
     Compresses an image during upload.
 
@@ -21,7 +21,7 @@ def compress_image(file: FileStorage, app: faab, path: str = None, quality: int 
     return utils.faab_compress_image(file=file, path=path, app=app, format_=format_, quality=quality)
 
 
-def upload(file: FileStorage, app: faab, path: str = None) -> str:
+def upload(file: FileStorage, app: Faab, path: str = None) -> str:
     """
     Uploads a file to a specified path.
 
