@@ -66,6 +66,8 @@
     import factory as fac 
     ```
 4. 配置数据库连接
+	> 一定要新建一个名为faab的数据库
+   
     ```python
     class DBConfig(object):
         # DB及Flask基础配置
@@ -79,6 +81,39 @@
         SECRET_KEY = 'session_key'
     ```
 5. 配置AutoAPI Model与蓝图
+	```python
+	class Spu(db.Model):
+    __bind_key__ = 'test'
+    __tablename__ = 'spu'
+    __table_args__ = {'extend_existing': True}
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(255), default='')
+    desc = db.Column(db.String(255), default='')
+    price = db.Column(db.Integer, default=0)
+    add_time = db.Column(db.DateTime, default=db.func.now())
+    is_delete = db.Column(db.Integer, default=0)
+	
+    class Users(FieldPermissionMixin, db.Model):
+        __bind_key__ = 'test'
+        __tablename__ = 'users'
+        __table_args__ = {'extend_existing': True}
+        id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+        faab_uid = db.Column(db.String(255), unique=True)
+        username = db.Column(db.String(255), unique=True)
+        password = db.Column(db.String(255))
+        nickname = db.Column(db.String(255), default='')
+        is_delete = db.Column(db.Integer, default=0)
+	
+        def accessible_fields(self, user):
+            # 根据user的角色或权限返回不同的字段列表
+            if user.get_role() == 'admin':
+                return ['id', 'username', 'nickname', 'faab_uid']  # 管理员可以访问的字段
+            else:
+                return ['id', 'username']  # 其他用户只能访问部分字段
+	
+	```
+	根据是否需要字段级权限控制，进行数据表model是否继承FieldPermissionMixin类。如继承类，则_Need_keys查询对权限字段进行交集处理后返回。
+
     ```python
     models = [
         [
@@ -113,6 +148,20 @@
 ## Faab开发文档
 
 详细的文档将在正式版更新。
+
+## RPC
+
+对于用户权限控制，采用了总表的方式，位于faab数据库的faab_users表内进行了身份权限的控制管理。faab_users表采用了Snowflake，方便分布式系统对用户的UID进行管理。如使用字段权限管理，在用户注册时请调用RPC接口如
+```python
+url = 'http://127.0.0.1:8011/rpc'
+payload = {
+"jsonrpc": "2.0",
+"method": "FaabRegister",
+"params": {"username": username, "password": password, "role": "user"},
+"id": 1
+}
+```
+result返回值code:200为正确加入，其余情况请勿添加新用户。
 
 ## 开源不易, 有了您的赞助, 我们会做的更好~
 

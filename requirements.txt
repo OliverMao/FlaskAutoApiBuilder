@@ -7,3 +7,4 @@ PyJWT~=0.3.2
 SQLAlchemy~=2.0.23
 setuptools~=68.2.0
 ffmpeg-python~=0.2.0
+Flask-JSONRPC~=3.0.1

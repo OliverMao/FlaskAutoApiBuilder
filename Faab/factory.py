@@ -41,3 +41,5 @@ def create_app(app, models, db_config, url_prefix: str | None = '/api', blueprin
         # db.drop_all()
         db.create_all()
     return app
+
+

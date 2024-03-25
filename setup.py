@@ -26,7 +26,7 @@ VERSION = '0.1.9'
 
 # What packages are required for this module to be executed?
 REQUIRED = [
-    'flask', 'flask-sqlalchemy', 'pymysql', 'PyJWT', 'Flask-Cors', 'Pillow', 'ffmpeg-python', 'werkzeug'
+    'flask', 'flask-sqlalchemy', 'pymysql', 'PyJWT', 'Flask-Cors', 'Pillow', 'ffmpeg-python', 'werkzeug', 'Flask-JSONRPC'
 ]
 
 # What packages are optional?
