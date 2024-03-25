@@ -12,30 +12,27 @@ from Faab.extensions import db
 import pandas as pd
 import io
 
+from Faab.Mixin import get_current_user, FieldPermissionMixin
+
 
 # ......
 
 class AutoUrl:
     def __init__(self, add_url_list):
         for i in add_url_list:
-            if 'authorization' in i:
-                authorization = i["authorization"]
-            else:
-                authorization = None
-            AutoDB(i["model"], i["bp"], i["url_prefix"], authorization)
+            AutoDB(i["model"], i["bp"], i["url_prefix"])
 
 
 class AutoDB:
     model = {}
     bp = object
     url_name = ""
-    authorization = None
-    def __init__(self, model, bp, url_name, authorization=None):
+
+    def __init__(self, model, bp, url_name):
 
         self.model = model
         self.bp = bp
         self.url_name = url_name
-        self.authorization = authorization
         self.bp.add_url_rule('/' + url_name + '/get', endpoint=bp.name + url_name + 'get',
                              view_func=self.get,
                              methods=['GET'])
@@ -55,31 +52,34 @@ class AutoDB:
                              view_func=self.export,
                              methods=['POST'])
 
+
     def list_to_return(self, get_list, need_keys=None):
         """
             FuncName:列表转返回值
             Parameter：查询出的结果
             Return：Http返回值
         """
+        user = get_current_user(g.uid)  # 获取当前用户对象
         result = []
         for item in get_list:
             data = {}
-            if need_keys:
-                for col in need_keys:
-                    value = str(getattr(item, col))
-                    if value != 'None':
-                        data[col] = value
-                    else:
-                        continue
+            if issubclass(type(item), FieldPermissionMixin):
+                data = item.to_dict(user, need_keys)
             else:
-                for col in class_mapper(self.model).mapped_table.c:
-                    if col.name[0] == '_':
-                        col.name = col.name[1:]
-                    value = str(getattr(item, col.name))
-                    if value != 'None':
-                        data[col.name] = value
-                    else:
-                        continue
+                if need_keys:
+                    for col in need_keys:
+                        value = str(getattr(item, col))
+                        if value != 'None':
+                            data[col] = value
+                        else:
+                            continue
+                else:
+                    for col in class_mapper(self.model).mapped_table.c:
+                        value = str(getattr(item, col.name))
+                        if value != 'None':
+                            data[col.name] = value
+                        else:
+                            continue
             result.append(data)
         return result
 

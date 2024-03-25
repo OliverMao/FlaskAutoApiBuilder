@@ -3,7 +3,7 @@
 from Faab import Faab
 from Faab.FaabJWT import jwt_authentication
 from blueprints.test import test_bp
-from blueprints.test.model import Users
+from blueprints.test.model import Spu, Users
 import factory as fac
 
 
@@ -22,10 +22,14 @@ class DBConfig(object):
 models = [
     [
         {
+            "model": Spu,
+            "bp": test_bp,
+            "url_prefix": "spu",
+        },
+{
             "model": Users,
             "bp": test_bp,
-            "url_prefix": "user",
-            "authorization": "user"  # TODO 待完善 添加用户权限类
+            "url_prefix": "users",
         }
     ]
 ]
@@ -34,6 +38,7 @@ app = Faab(import_name=__name__, static_url_path='/s')
 app.add_models(models)
 app.add_db_config(DBConfig)
 fac.register(app)
+app.add_rpc()
 app.faab_ready()
 application = app  # uWSGI启动必须有application
 

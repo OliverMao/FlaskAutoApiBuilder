@@ -2,19 +2,43 @@ from flask import g
 from sqlalchemy.orm import column_property, synonym
 
 from Faab.extensions import db
+from Faab.Mixin import FieldPermissionMixin
 
 
-class Users(db.Model):
+
+# 根据是否采用字段级权限控制，进行继承FieldPermissionMixin类
+class Spu(FieldPermissionMixin, db.Model):
+    __bind_key__ = 'test'
+    __tablename__ = 'spu'
+    __table_args__ = {'extend_existing': True}
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(255), default='')
+    desc = db.Column(db.String(255), default='')
+    price = db.Column(db.Integer, default=0)
+    add_time = db.Column(db.DateTime, default=db.func.now())
+    is_delete = db.Column(db.Integer, default=0)
+
+    def accessible_fields(self, user):
+        # 根据user的角色或权限返回不同的字段列表
+        if user.get_role() == 'admin':
+            return ['id', 'name', 'desc', 'price', 'add_time']  # 管理员可以访问所有字段
+        else:
+            return ['id', 'name']  # 其他用户只能访问部分字段
+
+class Users(FieldPermissionMixin, db.Model):
     __bind_key__ = 'test'
     __tablename__ = 'users'
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    faab_uid = db.Column(db.String(255), unique=True)
     username = db.Column(db.String(255), unique=True)
-    name = db.Column(db.String(255), default='')
     password = db.Column(db.String(255))
-    avatar = db.Column(db.Text(1000), default='')
+    nickname = db.Column(db.String(255), default='')
     is_delete = db.Column(db.Integer, default=0)
 
-
-    def __repr__(self):
-        return '<users %r>' % self.username
+    def accessible_fields(self, user):
+        # 根据user的角色或权限返回不同的字段列表
+        if user.get_role() == 'admin':
+            return ['id', 'username', 'nickname', 'faab_uid']  # 管理员可以访问所有字段
+        else:
+            return ['id', 'username']  # 其他用户只能访问部分字段

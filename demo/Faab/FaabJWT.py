@@ -17,11 +17,11 @@ headers = {
 }
 
 
-def create_token(username, password):
+def create_token(username, uid):
     # 构造payload
     payload = {
         'username': username,
-        'password': password,  # 自定义用户ID
+        'uid': uid,  # 自定义用户ID
         'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7)  # 超时时间
     }
     result = jwt.encode(payload=payload, key=SALT, algorithm="HS256", headers=headers)
@@ -56,25 +56,21 @@ def login_required(f):
 
     @functools.wraps(f)
     def wrapper(self, *args, **kwargs):
-        if self.authorization == None:
-            return f(self, *args, **kwargs)
-        else:
-            # 获取到了访问控制限制
-            try:
-                if g.username == -1:
-                    # print('error1')
-                    return {'message': 'token已失效'}, 401
-                elif g.username == -2:
-                    # print('error2')
-                    return {'message': 'token认证失败'}, 401
-                elif g.username == -3:
-                    # print('error3')
-                    return {'message': '非法的token'}, 401
-                else:
-                    return f(self, *args, **kwargs)
-            except Exception as e:
-                print(e)
-                return {'message': '请先登录认证.'}, 401
+        try:
+            if g.username == -1:
+                # print('error1')
+                return {'message': 'token已失效'}, 401
+            elif g.username == -2:
+                # print('error2')
+                return {'message': 'token认证失败'}, 401
+            elif g.username == -3:
+                # print('error3')
+                return {'message': '非法的token'}, 401
+            else:
+                return f(self, *args, **kwargs)
+        except Exception as e:
+            print(e)
+            return {'message': '请先登录认证.'}, 401
 
     '第2种方法,在返回内部函数之前,先修改wrapper的name属性'
     # wrapper.__name__ = f.__name__
@@ -100,6 +96,7 @@ def jwt_authentication():
             payload = jwt.decode(token, SALT, algorithms=['HS256'])
             "获取载荷中的信息赋值给g对象"
             g.username = payload.get('username')
+            g.uid = payload.get('uid')
         except exceptions.ExpiredSignatureError:  # 'token已失效'
             g.username = -1
         except jwt.DecodeError:  # 'token认证失败'
