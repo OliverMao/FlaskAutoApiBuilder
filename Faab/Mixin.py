@@ -1,25 +1,36 @@
-from flask import request
+from flask import request, g
 import time
 import threading
 
 from Faab.extensions import db
 from flask_jsonrpc import JSONRPC
 
-
 class FieldPermissionMixin:
-    def accessible_fields(self, user):
+    def accessible(self, user):
         # 默认返回空集合，表示没有字段可访问
         # 子类应该覆盖这个方法来实现具体逻辑
-        return set()
+        return dict()
 
     def to_dict(self, user, need_keys):
         # 根据用户权限，返回一个字典，包含可访问的字段
-        fields = self.accessible_fields(user)
-        if need_keys:
-            intersection = list(set(need_keys) & set(fields))
-            return {field: getattr(self, field) for field in intersection}
+        access = self.accessible(user)
+        fields = access['fields']
+        allow_other_row = access['allow_other_row']
+        if allow_other_row:
+            if need_keys:
+                intersection = list(set(need_keys) & set(fields))
+                return {field: getattr(self, field) for field in intersection}
+            else:
+                return {field: getattr(self, field) for field in fields}
         else:
-            return {field: getattr(self, field) for field in fields}
+            if user.uid == self.faab_uid:
+                if need_keys:
+                    intersection = list(set(need_keys) & set(fields))
+                    return {field: getattr(self, field) for field in intersection}
+                else:
+                    return {field: getattr(self, field) for field in fields}
+            else:
+                return {}
 
 
 class FaabUsers(FieldPermissionMixin, db.Model):

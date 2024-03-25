@@ -65,6 +65,8 @@ class AutoDB:
             data = {}
             if issubclass(type(item), FieldPermissionMixin):
                 data = item.to_dict(user, need_keys)
+                if data == {}:
+                    continue
             else:
                 if need_keys:
                     for col in need_keys:

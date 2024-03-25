@@ -104,16 +104,19 @@
         nickname = db.Column(db.String(255), default='')
         is_delete = db.Column(db.Integer, default=0)
 	
-        def accessible_fields(self, user):
-            # 根据user的角色或权限返回不同的字段列表
-            if user.get_role() == 'admin':
-                return ['id', 'username', 'nickname', 'faab_uid']  # 管理员可以访问的字段
-            else:
-                return ['id', 'username']  # 其他用户只能访问部分字段
-	
-	```
-	根据是否需要字段级权限控制，进行数据表model是否继承FieldPermissionMixin类。如继承类，则_Need_keys查询对权限字段进行交集处理后返回。
-
+        def accessible(self, user):
+           # 根据user的角色或权限返回不同的字段列表
+           if user.get_role() == 'admin':
+               fields = ['faab_uid', 'nickname', 'username', 'password', 'id']  # 管理员可以访问的字段
+               allow_other_row = True  # 允许访问非此faab_uid的行
+           else:
+	            fields = ['faab_uid', 'nickname']  # 其他用户只能访问部分字段
+	            allow_other_row = False  # 不允许访问非此faab_uid的行
+	        return {'fields': fields, 'allow_other_row': allow_other_row}
+   
+   ```
+   根据是否需要字段级权限控制，进行数据表model是否继承FieldPermissionMixin类。如继承类，则_Need_keys查询对权限字段进行交集处理后返回。
+   
     ```python
     models = [
         [
@@ -161,7 +164,7 @@ payload = {
 "id": 1
 }
 ```
-result返回值code:200为正确加入，其余情况请勿添加新用户。
+result返回值code:200为正确加入，其余情况请勿添加新用户。对于用户权限名称，例如admin、user，均由开发者进行控制，访问权限于model中进行管理。
 
 ## 开源不易, 有了您的赞助, 我们会做的更好~
 
