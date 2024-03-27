@@ -2,8 +2,14 @@ from flask import request, g
 import time
 import threading
 
+from sqlalchemy.orm.collections import InstrumentedList
+
 from Faab.extensions import db
 from flask_jsonrpc import JSONRPC
+
+
+
+
 
 class FieldPermissionMixin:
     def accessible(self, user):
@@ -11,27 +17,64 @@ class FieldPermissionMixin:
         # 子类应该覆盖这个方法来实现具体逻辑
         return dict()
 
-    def to_dict(self, user, need_keys):
+    def to_dict(self, user, need_keys=None):
         # 根据用户权限，返回一个字典，包含可访问的字段
         access = self.accessible(user)
         fields = access['fields']
         allow_other_row = access['allow_other_row']
         if allow_other_row:
+            # 如果允许查看其他行的数据，则返回所有字段
             if need_keys:
+                # 获取need_keys和可访问权限的交集
                 intersection = list(set(need_keys) & set(fields))
-                return {field: getattr(self, field) for field in intersection}
+                result = {}
+                for field in intersection:
+                    # 如果是外键关联，则迭代
+                    if issubclass(type(getattr(self, field)), InstrumentedList):
+                        result[field] = self.list_to_return(getattr(self, field), user, need_keys)
+                    else:
+                        result[field] = getattr(self, field)
+                return result
             else:
-                return {field: getattr(self, field) for field in fields}
+                result = {}
+                for field in fields:
+                    if issubclass(type(getattr(self, field)), InstrumentedList):
+                        result[field] = self.list_to_return(getattr(self, field), user)
+                    else:
+                        result[field] = getattr(self, field)
+                return result
         else:
             if user.uid == self.faab_uid:
                 if need_keys:
+                    result = {}
                     intersection = list(set(need_keys) & set(fields))
-                    return {field: getattr(self, field) for field in intersection}
+                    for field in intersection:
+                        if issubclass(type(getattr(self, field)), InstrumentedList):
+                            result[field] = self.list_to_return(getattr(self, field), user, need_keys)
+                        else:
+                            result[field] = getattr(self, field)
+                    return result
                 else:
-                    return {field: getattr(self, field) for field in fields}
+                    result = {}
+                    for field in fields:
+                        if issubclass(type(getattr(self, field)), InstrumentedList):
+                            result[field] = self.list_to_return(getattr(self, field), user)
+                        else:
+                            result[field] = getattr(self, field)
+                    return result
+                    # return {field: getattr(self, field) for field in fields}
             else:
                 return {}
 
+    @staticmethod
+    def list_to_return(get_list, user, need_keys=None):
+        datas = []
+        for i in get_list:
+            data = i.to_dict(user, need_keys)
+            if data == {}:
+                continue
+            datas.append(data)
+        return datas
 
 class FaabUsers(FieldPermissionMixin, db.Model):
     __tablename__ = 'faab_users'

@@ -40,10 +40,13 @@
 - Flask
 - SQLAlchemy
 - flasgger
-- Flask-JWT
+- PyJWT
 - Flask-CORS
 - Redis
 - PyMySQL
+- RPC
+- Flask-JSONRPC
+- FFmpeg
 
 ## 快速开始
 

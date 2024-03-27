@@ -3,7 +3,7 @@
 from Faab import Faab
 from Faab.FaabJWT import jwt_authentication
 from blueprints.test import test_bp
-from blueprints.test.model import Spu, Users
+from blueprints.test.model import Spu, Users, Order
 import factory as fac
 
 
@@ -30,6 +30,10 @@ models = [
             "model": Users,
             "bp": test_bp,
             "url_prefix": "users",
+        },{
+            "model": Order,
+            "bp": test_bp,
+            "url_prefix": "order",
         }
     ]
 ]

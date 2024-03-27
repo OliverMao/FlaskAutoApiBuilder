@@ -1,4 +1,5 @@
 from flask import g
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import column_property, synonym
 
 from Faab.extensions import db
@@ -38,13 +39,33 @@ class Users(FieldPermissionMixin, db.Model):
     password = db.Column(db.String(255))
     nickname = db.Column(db.String(255), default='')
     is_delete = db.Column(db.Integer, default=0)
+    orders = db.relationship('Order', backref='users', lazy=True)
+    def accessible(self, user):
+        # 根据user的角色或权限返回不同的字段列表
+        if user.get_role() == 'admin':
+            fields = ['faab_uid', 'nickname', 'username', 'password', 'id', 'orders']  # 管理员可以访问的字段
+            allow_other_row = True
+        else:
+            fields = ['faab_uid', 'nickname', 'orders']  # 其他用户只能访问部分字段
+            allow_other_row = False
+        return {'fields': fields, 'allow_other_row': allow_other_row}
+
+
+class Order(FieldPermissionMixin, db.Model):
+    __bind_key__ = 'test'
+    __tablename__ = 'order'
+    __table_args__ = {'extend_existing': True}
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    uid = db.Column(db.String(255), ForeignKey('users.faab_uid'))
+    desc = db.Column(db.String(255), default='')
+    is_delete = db.Column(db.Integer, default=0)
 
     def accessible(self, user):
         # 根据user的角色或权限返回不同的字段列表
         if user.get_role() == 'admin':
-            fields = ['faab_uid', 'nickname', 'username', 'password', 'id']  # 管理员可以访问的字段
+            fields = ['uid', 'desc', 'id']  # 管理员可以访问的字段
             allow_other_row = True
         else:
-            fields = ['faab_uid', 'nickname']  # 其他用户只能访问部分字段
+            fields = ['uid', 'desc']  # 其他用户只能访问部分字段
             allow_other_row = False
         return {'fields': fields, 'allow_other_row': allow_other_row}

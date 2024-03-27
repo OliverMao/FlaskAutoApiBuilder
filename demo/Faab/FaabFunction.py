@@ -3,8 +3,8 @@ from functools import wraps
 
 from flasgger import swag_from
 from flask import request, g, send_file
-from sqlalchemy import and_
-from sqlalchemy.orm import class_mapper
+from sqlalchemy import and_, or_
+from sqlalchemy.orm import class_mapper, joinedload
 from flask_sqlalchemy import SQLAlchemy
 
 from Faab.FaabJWT import login_required
@@ -19,8 +19,9 @@ from Faab.Mixin import get_current_user, FieldPermissionMixin
 
 class AutoUrl:
     def __init__(self, add_url_list):
+        self.models = add_url_list  # 当前bp下的全部数据模型
         for i in add_url_list:
-            AutoDB(i["model"], i["bp"], i["url_prefix"])
+            AutoDB(i["model"], i["bp"], i["url_prefix"], self.models)
 
 
 class AutoDB:
@@ -28,14 +29,14 @@ class AutoDB:
     bp = object
     url_name = ""
 
-    def __init__(self, model, bp, url_name):
-
+    def __init__(self, model, bp, url_name, models):
+        self.models = models  # 当前bp下的全部数据模型
         self.model = model
         self.bp = bp
         self.url_name = url_name
         self.bp.add_url_rule('/' + url_name + '/get', endpoint=bp.name + url_name + 'get',
                              view_func=self.get,
-                             methods=['GET'])
+                             methods=['POST'])
         self.bp.add_url_rule('/' + url_name + '/get_one', endpoint=bp.name + url_name + 'get_one',
                              view_func=self.get_one,
                              methods=['GET'])
@@ -52,13 +53,14 @@ class AutoDB:
                              view_func=self.export,
                              methods=['POST'])
 
-
-    def list_to_return(self, get_list, need_keys=None):
+    def list_to_return(self, get_list, need_keys=None, models_join=None):
         """
             FuncName:列表转返回值
             Parameter：查询出的结果
             Return：Http返回值
         """
+        if models_join is None:
+            models_join = []
         user = get_current_user(g.uid)  # 获取当前用户对象
         result = []
         for item in get_list:
@@ -168,11 +170,15 @@ class AutoDB:
     @swag_from('swag_config/get.yml')
     @login_required
     def get(self):
-        params = dict(request.args)
+        # params = dict(request.args)
+        params = request.json
         _Not_Filter = False
         pagination = False
         page = 0
         per_page = 0
+        or_filter = []
+        filters = []
+
         if '_Pagination' in params:
             pagination = True
             params.pop('_Pagination')
@@ -196,7 +202,7 @@ class AutoDB:
             desc_key = params.pop('_Desc')
             column = getattr(self.model, desc_key)
             query = self.model.query.filter_by(is_delete=0).order_by(column.desc())
-        filters = []
+
         if "_Range" in params:
             info = json.loads(params.pop('_Range'))
             key = info['key']
@@ -215,23 +221,47 @@ class AutoDB:
 
         need_keys = ''
         if '_Need_keys' in params:
-            need_keys = params.pop('_Need_keys').split(',')
+            need_keys = params.pop('_Need_keys')
 
-        for key, value in params.items():
-            filters.append(getattr(self.model, key) == value)
+        if '_Or' in params:
+            or_value = params.pop('_Or')
+            for item in or_value:
+                for key, value in item.items():
+                    or_filter.append(getattr(self.model, key) == value)
+
+        # TODO 有待分析使用_And还是直接放入条件
+        if '_And' in params:
+            and_value = params.pop('_And')
+            for item in and_value:
+                for key, value in item.items():
+                    filters.append(getattr(self.model, key) == value)
+
+        # for key, value in params.items(): filters.append(getattr(self.model, key) == value) _inner_join = False
+        # models_join = [] # 内连接 Inner Join if '_Inner_join' in params: _inner_join = True join_models = params.pop(
+        # '_Inner_join') for i in join_models: model_other = self.find_model_by_name(i['model']) models_join.append(
+        # model_other) query = query.join(model_other, getattr(model_other, i['key']) == getattr(self.model,
+        # i['_key'])).add_entity(model_other)
 
         if _Not_Filter != False:
             for dictionary in _Not_Filter:
                 for key, value in dictionary.items():
                     filters.append(getattr(self.model, key) != value)
 
+        if or_filter:
+            query = query.filter(or_(*or_filter))
+
         if filters:
             query = query.filter(and_(*filters))
+
         if not pagination:
             if get_resu_num:
                 lists = query.limit(get_resu_num)
             else:
                 lists = query.all()
+            # print(query)
+            # if _inner_join:
+            #     return self.list_to_return(lists, need_keys, models_join)
+            # else:
             return self.list_to_return(lists, need_keys)
         else:
             lists = query.paginate(page=page, per_page=per_page, error_out=False)
@@ -369,6 +399,12 @@ class AutoDB:
                 return {'error': e, 'code': -1}
         else:
             return {'error': '未查询到匹配数据', 'code': 0}
+
+    def find_model_by_name(self, model_name):
+        for item in self.models:
+            if item['model'].__name__ == model_name:
+                return item['model']
+        return None
 
 
 def export_to_excel(db_list, need_export, _Price):
