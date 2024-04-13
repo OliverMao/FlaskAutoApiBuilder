@@ -11,7 +11,7 @@ from flask_jsonrpc import JSONRPC
 
 
 
-class FieldPermissionMixin:
+class FaabFieldPermissionMixin:
     def accessible(self, user):
         # 默认返回空集合，表示没有字段可访问
         # 子类应该覆盖这个方法来实现具体逻辑
@@ -76,7 +76,7 @@ class FieldPermissionMixin:
             datas.append(data)
         return datas
 
-class FaabUsers(FieldPermissionMixin, db.Model):
+class FaabUsers(FaabFieldPermissionMixin, db.Model):
     __tablename__ = 'faab_users'
     __table_args__ = {'extend_existing': True}
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

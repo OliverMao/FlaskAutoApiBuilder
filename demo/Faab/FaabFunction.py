@@ -12,7 +12,7 @@ from Faab.extensions import db
 import pandas as pd
 import io
 
-from Faab.Mixin import get_current_user, FieldPermissionMixin
+from Faab.Mixin import get_current_user, FaabFieldPermissionMixin
 
 
 # ......
@@ -65,7 +65,7 @@ class AutoDB:
         result = []
         for item in get_list:
             data = {}
-            if issubclass(type(item), FieldPermissionMixin):
+            if issubclass(type(item), FaabFieldPermissionMixin):
                 data = item.to_dict(user, need_keys)
                 if data == {}:
                     continue
@@ -243,9 +243,8 @@ class AutoDB:
         # i['_key'])).add_entity(model_other)
 
         if _Not_Filter != False:
-            for dictionary in _Not_Filter:
-                for key, value in dictionary.items():
-                    filters.append(getattr(self.model, key) != value)
+            for key, value in _Not_Filter.items():
+                filters.append(getattr(self.model, key) != value)
 
         if or_filter:
             query = query.filter(or_(*or_filter))

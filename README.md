@@ -96,7 +96,7 @@
     add_time = db.Column(db.DateTime, default=db.func.now())
     is_delete = db.Column(db.Integer, default=0)
 	
-    class Users(FieldPermissionMixin, db.Model):
+    class Users(FaabFieldPermissionMixin, db.Model):
         __bind_key__ = 'test'
         __tablename__ = 'users'
         __table_args__ = {'extend_existing': True}
@@ -118,7 +118,7 @@
 	        return {'fields': fields, 'allow_other_row': allow_other_row}
    
    ```
-   根据是否需要字段级权限控制，进行数据表model是否继承FieldPermissionMixin类。如继承类，则_Need_keys查询对权限字段进行交集处理后返回。
+   根据是否需要字段级权限控制，进行数据表model是否继承FaabFieldPermissionMixin类。如继承类，则_Need_keys查询对权限字段进行交集处理后返回。
    
     ```python
     models = [

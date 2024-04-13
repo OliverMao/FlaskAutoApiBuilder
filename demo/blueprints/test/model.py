@@ -3,11 +3,11 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import column_property, synonym
 
 from Faab.extensions import db
-from Faab.Mixin import FieldPermissionMixin
+from Faab.Mixin import FaabFieldPermissionMixin
 
 
-# 根据是否采用字段级权限控制，进行继承FieldPermissionMixin类
-class Spu(FieldPermissionMixin, db.Model):
+# 根据是否采用字段级权限控制，进行继承FaabFieldPermissionMixin类
+class Spu(FaabFieldPermissionMixin, db.Model):
     __bind_key__ = 'test'
     __tablename__ = 'spu'
     __table_args__ = {'extend_existing': True}
@@ -29,7 +29,7 @@ class Spu(FieldPermissionMixin, db.Model):
         return {'fields': fields, 'allow_other_row': allow_other_row}
 
 
-class Users(FieldPermissionMixin, db.Model):
+class Users(FaabFieldPermissionMixin, db.Model):
     __bind_key__ = 'test'
     __tablename__ = 'users'
     __table_args__ = {'extend_existing': True}
@@ -51,7 +51,7 @@ class Users(FieldPermissionMixin, db.Model):
         return {'fields': fields, 'allow_other_row': allow_other_row}
 
 
-class Order(FieldPermissionMixin, db.Model):
+class Order(FaabFieldPermissionMixin, db.Model):
     __bind_key__ = 'test'
     __tablename__ = 'order'
     __table_args__ = {'extend_existing': True}
